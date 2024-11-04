@@ -134,7 +134,7 @@ export default async function CookiesPage() {
 ```
 
 3. Mandamos el `cookieTab` a nuestro component `TabBar`: Pero como esta esperando un dato de tipo number debido a nuestra interface tenemos que convertirlo y lo podemos hacer de varias formas:
-   
+
 - Convirtiendo el resultado directamente en la const
 
 ```js
@@ -147,9 +147,96 @@ const cookieTab = Number(cookieStore.get("selectedTab")?.value ?? "1");
 <TabBar currentTab={+cookieTab} />
 ```
 
-## Diseño de pantalla de productos
+## Diseño de pantalla de productos y Mostrar listado de productos
 
-Lo que hicimos fue agregar una nueva ruta ```/dashboard/products```. Por otra parte, creamos un nuevo component para mostrar en dicha page, ```ProductCard.tsx``` y agregamos una carpeta ```data`` con datos ficticios para nuestra pantalla de productos.
+Lo que hicimos fue agregar una nueva ruta `/dashboard/products`. Por otra parte, creamos un nuevo component para mostrar en dicha page, `ProductCard.tsx` y agregamos una carpeta ``data` con datos ficticios para nuestra pantalla de productos.
 
-## Mostrar listado de productos
+## Shopping Cart - Client Side
 
+Agregaremos la funcionalidad para almacenar la cantidad de productos que hagamos click en su ProductCard.
+
+1. Creamos una nueva carpeta `shopping-cart` y en ella una sub-carpeta `actions` con el archivo actions.ts
+2. Dentro del archivo actions.ts vamos a crear la primera función para retornar el object de la estructura:
+
+```js
+// 'use client'
+import { getCookie, hasCookie } from "cookies-next";
+/*
+Estructura
+cookie: cart
+{
+    'uui-123-1':4, // id del producto : cuanto esta llevando
+    'uui-123-2':3,
+    'uui-123-3':1,
+}
+*/
+// Function para retornar el object de la estructura
+export const getCookieCart = (): { [id: string]: number } => {
+  if (hasCookie("cart")) {
+    const cookieCart = JSON.parse((getCookie("cart") as string) ?? " {}");
+    return cookieCart;
+  }
+
+  return {};
+};
+
+```
+
+3. Agregamos la lógica para agregar un producto a este object
+
+```js
+export const addProductToCart = (id: string) => {
+  const cookieCart = getCookieCart();
+
+  if (cookieCart[id]) {
+    cookieCart[id] = cookieCart[id] + 1;
+  } else {
+    cookieCart[id] = 1;
+  }
+
+  setCookie("cart", JSON.stringify(cookieCart)); // siempre hay que serializarlo como string
+};
+```
+
+4. Utilizamos la función addProductToCart() en el component ProductCard.tsx
+
+```js
+"use client";
+
+// https://tailwindcomponents.com/component/e-commerce-product-card
+
+import Image from "next/image";
+import { IoAddCircleOutline, IoTrashOutline } from "react-icons/io5";
+import Star from "./Star";
+import { addProductToCart } from "@/shopping-cart/actions/actions";
+
+interface Props {
+  id: string;
+  name: string;
+  price: number;
+  rating: number;
+  image: string;
+}
+
+export const ProductCard = ({ id, name, price, rating, image }: Props) => {
+  const onAddToCart = () => {
+    addProductToCart(id);
+  };
+
+  return (
+    <div className="bg-white shadow rounded-lg max-w-sm bg-gray-800 border-gray-100">
+      <div className="flex">
+        <button
+          onClick={onAddToCart}
+          className="text-white mr-2 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center bg-blue-600 hover:bg-blue-700 focus:ring-blue-800"
+        >
+          <IoAddCircleOutline size={25} />
+        </button>
+        <button className="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center bg-red-600 hover:bg-red-700 focus:ring-red-800">
+          <IoTrashOutline size={20} />
+        </button>
+      </div>
+    </div>
+  );
+};
+```

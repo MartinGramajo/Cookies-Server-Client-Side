@@ -146,3 +146,10 @@ const cookieTab = Number(cookieStore.get("selectedTab")?.value ?? "1");
 ```js
 <TabBar currentTab={+cookieTab} />
 ```
+
+## Diseño de pantalla de productos
+
+Lo que hicimos fue agregar una nueva ruta ```/dashboard/products```. Por otra parte, creamos un nuevo component para mostrar en dicha page, ```ProductCard.tsx``` y agregamos una carpeta ```data`` con datos ficticios para nuestra pantalla de productos.
+
+## Mostrar listado de productos
+

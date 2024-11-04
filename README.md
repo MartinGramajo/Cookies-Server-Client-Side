@@ -54,7 +54,7 @@ Hacemos copia del proyecto de la sección anterior para trabajar sobre un nuevo 
 ## Introducción a las cookies
 
 Las `cookies` nos sirven para tener una comunicación directa desde el cliente al servidor.
-En ellas podemos almacenar información por medios de id o con un string.
+En ellas podemos almacenar información no sensible por medios de id o con un string.
 Las cookies nos sirven también para leer información util por parte del usuario. Ejemplo: Si un usuario le gusta mucho ver sobre camisetas, podemos utilizar esa información, leerla desde el lado del backend para que al cargarle la aplicación le damos prioridad a ese tipo de producto.
 
 #### Diferencia entre cookies y localStorage
@@ -90,4 +90,59 @@ const onTabSelected = (tab: number) => {
 
 ## Cookies - Server Side
 
-[Para leer las cookies desde el lado del servidor](https://nextjs.org/docs/app/api-reference/functions/cookies)
+1. [Para leer las cookies desde el lado del servidor](https://nextjs.org/docs/app/api-reference/functions/cookies)
+
+2. Nos recomienda que en el archivo `page.tsx` donde estamos trabajando con nuestras `cookies ` utilicemos el siguiente bloque de código:
+
+```js
+import { cookies } from "next/headers";
+
+export default async function Page() {
+  const cookieStore = await cookies(); // tomamos el cookieStore para poder utilizar sus distintos métodos.
+  const theme = cookieStore.get("theme");
+  return "...";
+}
+```
+
+En nuestro caso:
+
+```js
+import { cookies } from "next/headers";
+import { TabBar } from "@/components";
+
+export const metadata = {
+  title: "Cookies Page",
+  description: "Cookies Page",
+};
+
+export default async function CookiesPage() {
+  const cookieStore = await cookies();
+  // Esa condición la agregamos porque en un punto de nuestro app
+  // las cookies no están seteadas es decir que son null por ende nos aseguramos
+  // que tengan un valor por defecto, en ese caso de 1
+  const cookieTab = cookieStore.get("selectedTab")?.value ?? "1";
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className="flex flex-col">
+        <span className="text-3xl">Tabs</span>
+        <TabBar />
+      </div>
+    </div>
+  );
+}
+```
+
+3. Mandamos el `cookieTab` a nuestro component `TabBar`: Pero como esta esperando un dato de tipo number debido a nuestra interface tenemos que convertirlo y lo podemos hacer de varias formas:
+   
+- Convirtiendo el resultado directamente en la const
+
+```js
+const cookieTab = Number(cookieStore.get("selectedTab")?.value ?? "1");
+```
+
+- Agregando el + al enviarlo:
+
+```js
+<TabBar currentTab={+cookieTab} />
+```

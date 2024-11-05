@@ -31,7 +31,19 @@ export const addProductToCart = (id: string) => {
   } else {
     cookieCart[id] = 1;
   }
-
+  // actualiza el carrito
   setCookie("cart", JSON.stringify(cookieCart)); // siempre hay que serializarlo como string
+};
 
+// function para remover  productos
+
+export const removeProductFromCart = (id: string) => {
+  // 1. tomar nuestro carrito
+  const cookieCart = getCookieCart();
+
+  // 2. eliminar una propiedad por id (no importa que no exista)
+  delete cookieCart[id];
+
+  // 3. actualizar el carrito
+  setCookie("cart", JSON.stringify(cookieCart));
 };

@@ -6,6 +6,9 @@ import {
   CiShoppingBasket,
 } from "react-icons/ci";
 
+
+// utilizamos el cart que tenia id y value y unicamente sumamos los values para tener un numero, que seria el item
+
 const getTotalCount = (cart: { [id: string]: number }): number => {
   let items = 0; // El numero que vamos a mostrar
 
@@ -19,10 +22,11 @@ const getTotalCount = (cart: { [id: string]: number }): number => {
 const TopMenu = async () => {
   const cookieStore = await cookies();
 
-  // esto son los objetos de nuestra estructura por ende tenemos que contar los valores
+  // Tomamos el object con todos nuestros productos y lo guardamos en la variable cart 
   const cart = JSON.parse(cookieStore.get("cart")?.value ?? "{}");
 
-  // guardamos el resultado en una variable
+
+  // guardamos el resultado, es decir, el item, el numero total en una variable
 
   const totalItems = getTotalCount(cart);
 

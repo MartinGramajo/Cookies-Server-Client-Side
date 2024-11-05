@@ -240,3 +240,170 @@ export const ProductCard = ({ id, name, price, rating, image }: Props) => {
   );
 };
 ```
+
+## Shopping Cart - Server Side
+
+1. Trabajamos sobre TopMenu y al ser un `Server Component` tenemos accesos a las cookies como nos la ofrece Next.
+
+```js
+import { cookies } from "next/headers";
+
+const TopMenu =  async () => {
+  const cookieStore = await cookies();
+  const cart = JSON.parse(cookieStore.get('cart')?.value ?? '{}');
+
+```
+
+2. Agregamos la función para contar los valores de cada uno de los objects
+
+```js
+  const getTotalCount = () => {
+    let items = 0; // El numero que vamos a mostrar
+
+    Object.values(cart).forEach((value) => {
+      items += value as number; // aqui sumamos los valores que tienen los productos en el carrito
+    });
+
+    return items;
+  };
+
+```
+
+Nota: en el value de la linea 264 nos pedía asignarle el tipo, en este caso tenemos dos opciones podemos tipar la variable de la linea 253 o bien asignarle el `as number` al value de la linea 264.
+
+3. Ahora nos toca actualizar la pantalla sin la necesidad de recargar la pagina, para ello vamos a utilizar el useRouter() en el component ProductCard.tsx
+
+```js
+import { useRouter } from "next/navigation";
+
+export const ProductCard = ({ id, name, price, rating, image }: Props) => {
+  const router = useRouter()
+  const onAddToCart = () => {
+    addProductToCart(id);
+    router.refresh();
+  };
+```
+
+4. Optimizamos el codigo del componente TopMenu, separamos la función y guardamos su valor para utilizarlo en el component.
+
+```js
+import { cookies } from "next/headers";
+import {
+  CiChat1,
+  CiMenuBurger,
+  CiSearch,
+  CiShoppingBasket,
+} from "react-icons/ci";
+
+
+// utilizamos el cart que tenia id y value y unicamente sumamos los values para tener un numero, que seria el item
+
+const getTotalCount = (cart: { [id: string]: number }): number => {
+  let items = 0; // El numero que vamos a mostrar
+
+  Object.values(cart).forEach((value) => {
+    items += value as number; // aquí sumamos los valores que tienen los productos en el carrito
+  });
+
+  return items;
+};
+
+const TopMenu = async () => {
+  const cookieStore = await cookies();
+
+  // Tomamos el object con todos nuestros productos y lo guardamos en la variable cart
+  const cart = JSON.parse(cookieStore.get("cart")?.value ?? "{}");
+
+
+  // guardamos el resultado, es decir, el item, el numero total en una variable
+
+  const totalItems = getTotalCount(cart);
+
+  return (
+    <div className="sticky z-10 top-0 h-16 border-b bg-white lg:py-2.5">
+      <div className="px-6 flex items-center justify-between space-x-4">
+        <h5 hidden className="text-2xl text-gray-600 font-medium lg:block">
+          Dashboard
+        </h5>
+        <button className="w-12 h-16 -mr-2 border-r lg:hidden">
+          <CiMenuBurger size={30} />
+        </button>
+        <div className="flex space-x-2">
+          <div hidden className="md:block">
+            <div className="relative flex items-center text-gray-400 focus-within:text-cyan-400">
+              <span className="absolute left-4 h-6 flex items-center pr-3 border-r border-gray-300">
+                <CiSearch />
+              </span>
+              <input
+                type="search"
+                name="leadingIcon"
+                id="leadingIcon"
+                placeholder="Search here"
+                className="w-full pl-14 pr-4 py-2.5 rounded-xl text-sm text-gray-600 outline-none border border-gray-300 focus:border-cyan-300 transition"
+              />
+            </div>
+          </div>
+
+          <button className="flex items-center justify-center w-10 h-10 rounded-xl border bg-gray-100 focus:bg-gray-100 active:bg-gray-200 md:hidden">
+            <CiSearch />
+          </button>
+          <button className="flex items-center justify-center w-10 h-10 rounded-xl border bg-gray-100 focus:bg-gray-100 active:bg-gray-200">
+            <CiChat1 size={25} />
+          </button>
+          <button className="flex items-center justify-center p-2 h-10 rounded-xl border bg-gray-100 focus:bg-gray-100 active:bg-gray-200">
+            {totalItems > 0 && (
+              <span className="text-sm mr-2 text-blue-800 font-bold">
+                {totalItems}
+              </span>
+            )}
+
+            <CiShoppingBasket size={25} />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default TopMenu;
+
+
+```
+
+## Eliminar Productos del carrito
+
+1. En `actions.ts` vamos a crear la función:
+
+```js
+export const removeProductFromCart = (id: string) => {
+  // 1. tomar nuestro carrito
+  const cookieCart = getCookieCart();
+
+  // 2. eliminar una propiedad por id (no importa que no exista)
+  delete cookieCart[id];
+
+  // 3. actualizar el carrito
+  setCookie("cart", JSON.stringify(cookieCart));
+};
+```
+
+2. La utilizamos en `ProductCard.tsx`
+
+```js
+import {
+  addProductToCart,
+  removeProductFromCart,
+} from "@/shopping-cart/actions/actions";
+
+const onRemoveFromCart = () => {
+  removeProductFromCart(id);
+  router.refresh();
+};
+
+<button
+  onClick={onRemoveFromCart}
+  className="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center bg-red-600 hover:bg-red-700 focus:ring-red-800"
+>
+  <IoTrashOutline size={20} />
+</button>;
+```

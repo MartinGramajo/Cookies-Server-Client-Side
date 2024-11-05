@@ -1,11 +1,11 @@
 import { cookies } from "next/headers";
+import Link from "next/link";
 import {
   CiChat1,
   CiMenuBurger,
   CiSearch,
   CiShoppingBasket,
 } from "react-icons/ci";
-
 
 // utilizamos el cart que tenia id y value y unicamente sumamos los values para tener un numero, que seria el item
 
@@ -22,9 +22,8 @@ const getTotalCount = (cart: { [id: string]: number }): number => {
 const TopMenu = async () => {
   const cookieStore = await cookies();
 
-  // Tomamos el object con todos nuestros productos y lo guardamos en la variable cart 
+  // Tomamos el object con todos nuestros productos y lo guardamos en la variable cart
   const cart = JSON.parse(cookieStore.get("cart")?.value ?? "{}");
-
 
   // guardamos el resultado, es decir, el item, el numero total en una variable
 
@@ -61,7 +60,11 @@ const TopMenu = async () => {
           <button className="flex items-center justify-center w-10 h-10 rounded-xl border bg-gray-100 focus:bg-gray-100 active:bg-gray-200">
             <CiChat1 size={25} />
           </button>
-          <button className="flex items-center justify-center p-2 h-10 rounded-xl border bg-gray-100 focus:bg-gray-100 active:bg-gray-200">
+
+          <Link
+            href={"/dashboard/cart"}
+            className="flex items-center justify-center p-2 h-10 rounded-xl border bg-gray-100 focus:bg-gray-100 active:bg-gray-200"
+          >
             {totalItems > 0 && (
               <span className="text-sm mr-2 text-blue-800 font-bold">
                 {totalItems}
@@ -69,7 +72,7 @@ const TopMenu = async () => {
             )}
 
             <CiShoppingBasket size={25} />
-          </button>
+          </Link>
         </div>
       </div>
     </div>

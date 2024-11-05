@@ -407,3 +407,90 @@ const onRemoveFromCart = () => {
   <IoTrashOutline size={20} />
 </button>;
 ```
+
+## Diseño de la pantalla de carrito
+
+El objetivo de esta pantalla es renderizar la información con los datos que tenemos en las cookies, es decir, los productos que estamos llevando en nuestro carrito de compra. La navegación se va a efectuar desde el mismo botón donde muestra el numero de productos que vamos agregando.
+
+1. Creamos en la ruta a la pagina dashboard/cart/page.tsx
+
+2. En el component `TopMenu` vamos a hacer la navegación a la page que creamos en el punto 1. Simplemente agregando un LINK de next y el path de la ruta que creamos '/dashboard/cart'
+
+```js
+<Link
+  href={"/dashboard/cart"}
+  className="flex items-center justify-center p-2 h-10 rounded-xl border bg-gray-100 focus:bg-gray-100 active:bg-gray-200"
+>
+  {totalItems > 0 && (
+    <span className="text-sm mr-2 text-blue-800 font-bold">{totalItems}</span>
+  )}
+
+  <CiShoppingBasket size={25} />
+</Link>
+```
+
+3. Trabajamos sobre la page.tsx
+
+Tomamos las cookies y la guardamos
+
+```js
+  // 1. tomamos las cookies
+  const cookiesStore = await cookies();
+
+  // 2. guardamos las cookies en una variable
+  const cart = JSON.parse(cookiesStore.get("cart")?.value ?? "{}") as {
+    [id: string]: number;
+  };
+
+
+```
+
+Creamos una función para devolver el arreglo con los productos que se encuentran actualmente en mi carrito
+
+```js
+interface ProductInCart {
+  product: Product;
+  quantity: number;
+}
+
+// esta function retorna un arreglo de los productos
+const getProductsInCart = (cart: { [id: string]: number }): ProductInCart[] => {
+  // vamos a generar el array de los productos
+  const productsInCart: ProductInCart[] = [];
+
+  // ahora hacemos el barrido de los productos,
+  for (const id in cart) {
+    // esto nos trae toda la información del producto que coincida con el id
+    const product = products.find((prod) => prod.id === id);
+    // si el product existe lo vamos a pushear en productsInCart
+    if (product) {
+      productsInCart.push({ product, quantity: cart[id] });
+    }
+  }
+  return productsInCart;
+};
+```
+
+Ahora que ya tenemos barrido los productos y guardados en un array lo guardamos
+
+```js
+const productsInCart = getProductsInCart(cart);
+```
+
+Por ultimo lo utilizamos
+
+```js
+return (
+  <div>
+    <h1 className="text-5xl">Productos en el carrito </h1>
+    <hr className="mb-2" />
+    <div className="flex flex-col sm:flex-row gap-2 w-full">
+      <div className="flex flex-col gap-2 w-full sm:w-8/12">
+        {productsInCart.map(({ product, quantity }) => (
+          <ItemCard key={product.id} product={product} quantity={quantity} />
+        ))}
+      </div>
+    </div>
+  </div>
+);
+```

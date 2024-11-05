@@ -10,7 +10,9 @@ export const metadata = {
 export default function DashboardPage() {
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-      <WidgetItem />
+      {/* <WidgetItem  title="Total a pagar">
+  
+      </WidgetItem> */}
     </div>
   );
 }

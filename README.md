@@ -539,3 +539,78 @@ export const removeSingleItemFromCart = (id: string) => {
   setCookie("cart", JSON.stringify(cookieCart));
 };
 ```
+
+## Total + Impuestos
+
+1. Trabajamos en la page de cart en donde vamos a utilizar el `WidgetItem`
+
+2. Haremos que ese `WidgetItem` reciba children, es decir, que reciba elementos.
+
+```js
+<div className="flex flex-col w-full sm:w-4/12">
+  <WidgetItem title="Total a pagar">
+    <div className="mt-2 flex justify-center gap-4">
+      <h3 className="text-3xl font-bold text-gray-700">$...</h3>
+    </div>
+    <span className=" font-bold text-center text-gray-500">
+      Impuestos 15%: $...
+    </span>
+  </WidgetItem>
+</div>
+```
+
+3. Hacemos modificaciones en el component `WidgetItem`
+
+```js
+interface Props {
+  title: string;
+  children: React.ReactNode;
+}
+
+const WidgetItem = ({ title, children }: Props) => {
+  return (
+    <div className="md:col-span-2 lg:col-span-1">
+      <div className="h-full py-8 px-6 space-y-6 rounded-xl border border-gray-200 bg-white">
+        <div className="flex flex-col">
+          <h5 className="text-xl text-gray-600 text-center">{title}</h5>
+          <div className="mt-2 flex flex-col justify-center gap-4">
+            {children}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default WidgetItem;
+```
+
+4. Por ultimo hacemos la función para calcular el impuesto en 15%, utilizando el method reduce de los array
+
+```js
+//Para el total a pagar vamos a hacer uso del reduce()
+// prev: valor anterior = 0
+// current : valor actual, es decir, la iteración.
+
+const totalToPay = productsInCart.reduce(
+  (prev, current) => current.product.price * current.quantity + prev,
+  0
+);
+```
+
+5. y lo utilizamos
+
+```js
+<div className="flex flex-col w-full sm:w-4/12">
+  <WidgetItem title="Total a pagar">
+    <div className="mt-2 flex justify-center gap-4">
+      <h3 className="text-3xl font-bold text-gray-700">
+        ${(totalToPay * 1.15).toFixed(2)}
+      </h3>
+    </div>
+    <span className=" font-bold text-center text-gray-500">
+      Impuestos 15%: $ {(totalToPay * 0.15).toFixed(2)}
+    </span>
+  </WidgetItem>
+</div>
+```

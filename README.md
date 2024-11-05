@@ -494,3 +494,48 @@ return (
   </div>
 );
 ```
+
+## Agregar y eliminar productos de 1 en 1
+
+Para agregar utilizaremos la siguiente función que ya la teníamos en nuestro actions.ts
+
+```js
+// function para agregar un producto al object de la estructura
+export const addProductToCart = (id: string) => {
+  const cookieCart = getCookieCart();
+
+  if (cookieCart[id]) {
+    cookieCart[id] = cookieCart[id] + 1;
+  } else {
+    cookieCart[id] = 1;
+  }
+  // actualiza el carrito
+  setCookie("cart", JSON.stringify(cookieCart)); // siempre hay que serializarlo como string
+};
+```
+
+Para eliminar de uno en uno creamos la siguiente función:
+
+```js
+export const removeSingleItemFromCart = (id: string) => {
+  // 1. tomar nuestro carrito
+  const cookieCart = getCookieCart();
+
+  // 2. Preguntamos si existe el product. Regla de seguridad
+
+  if (!cookieCart[id]) return;
+
+  // 3.Creamos unas const para ser mas facil de leer
+  const itemsInCart = cookieCart[id] - 1;
+
+  // 4.   Hacemos la verificación de la cart
+  if (itemsInCart <= 0) {
+    delete cookieCart[id];
+  } else {
+    cookieCart[id] = itemsInCart; // actualizamos el carrito con los items restantes
+  }
+
+  // 5. actualizar el carrito
+  setCookie("cart", JSON.stringify(cookieCart));
+};
+```

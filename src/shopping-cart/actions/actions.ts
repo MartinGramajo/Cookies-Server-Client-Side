@@ -47,3 +47,47 @@ export const removeProductFromCart = (id: string) => {
   // 3. actualizar el carrito
   setCookie("cart", JSON.stringify(cookieCart));
 };
+
+export const removeSingleItemFromCart = (id: string) => {
+  // 1. tomar nuestro carrito
+  const cookieCart = getCookieCart();
+
+  // 2. Preguntamos si existe el product
+
+  if (!cookieCart[id]) return;
+
+  // 3.Si existe vamos a eliminar de uno en uno y en caso de llegar a 0 borrar la tarjeta
+  if (cookieCart[id] > 0) {
+    cookieCart[id]--;
+  }
+  if (cookieCart[id] === 0) {
+    // elimina la propiedad si es 0 o menos
+    delete cookieCart[id];
+  }
+
+  // 3. actualizar el carrito
+  setCookie("cart", JSON.stringify(cookieCart));
+};
+
+// Solución de clase
+export const removeTSingleItemFromCart = (id: string) => {
+  // 1. tomar nuestro carrito
+  const cookieCart = getCookieCart();
+
+  // 2. Preguntamos si existe el product. Regla de seguridad
+
+  if (!cookieCart[id]) return;
+
+  // 3.Creamos unas const para ser mas facil de leer
+  const itemsInCart = cookieCart[id] - 1;
+
+  // 4.   Hacemos la verificación de la cart
+  if (itemsInCart <= 0) {
+    delete cookieCart[id];
+  } else {
+    cookieCart[id] = itemsInCart; // actualizamos el carrito con los items restantes
+  }
+
+  // 5. actualizar el carrito
+  setCookie("cart", JSON.stringify(cookieCart));
+};
